@@ -56,21 +56,25 @@ void setup() {
     Serial.println();
     Serial.print("IP Address: ");
     Serial.println(WiFi.localIP());
-  // Send web page with input fields to client
+
+  // Enviar pagina login al navegador
    server.on("/", HTTP_GET, [](AsyncWebServerRequest *request) {
       request->send(SPIFFS, "/index.html", "text/html");
     });
+  // Cwrgar estilo de login localmente
    server.on("/style1", HTTP_GET, [](AsyncWebServerRequest *request){
     request->send(SPIFFS, "/all.min.css", "text/css");
   });
+  // Cwrgar estilo de login localmente
    server.on("/style2", HTTP_GET, [](AsyncWebServerRequest *request){
     request->send(SPIFFS, "/bootstrap.min.css", "text/css");
   });
+  // Cargar estilo de login localmente
    server.on("/style3", HTTP_GET, [](AsyncWebServerRequest *request){
     request->send(SPIFFS, "/bootstrap.bundle.min.js", "text/js");
   });
-  
-    server.on("/logo", HTTP_GET, [](AsyncWebServerRequest *request){
+  // Cargar estilo de login localmente
+   server.on("/logo", HTTP_GET, [](AsyncWebServerRequest *request){
     request->send(SPIFFS, "/logo.png", "image/png");
     });
   
