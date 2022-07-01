@@ -66,9 +66,10 @@ void setup() {
     request->send(SPIFFS, "/all.min.css", "text/css");
   });
   // Cwrgar estilo de login localmente
-   server.on("/style2", HTTP_GET, [](AsyncWebServerRequest *request){
+  server.on("/style2", HTTP_GET, [](AsyncWebServerRequest *request){
     request->send(SPIFFS, "/bootstrap.min.css", "text/css");
-  });
+    });  
+  
   // Cargar estilo de login localmente
    server.on("/style3", HTTP_GET, [](AsyncWebServerRequest *request){
     request->send(SPIFFS, "/bootstrap.bundle.min.js", "text/js");
@@ -80,7 +81,7 @@ void setup() {
   
 
   // Send a GET request to <ESP_IP>/get?input1=<inputMessage>
-  server.on("/get", HTTP_GET, [] (AsyncWebServerRequest *request) {
+  /*server.on("/get", HTTP_GET, [] (AsyncWebServerRequest *request) {
     String inputMessage1;
     String inputMessage2;
     String inputParam1;
@@ -99,8 +100,78 @@ void setup() {
     }
     Serial.println(inputMessage1);
     Serial.println(inputMessage2);
-    request->send(SPIFFS, "/dashboardAdmin.html", "text/html");;
+    request->send(SPIFFS, "/dashboardAdmin.html"+inputMessage1,"text/html");
+  });*/
+ server.on("/get", HTTP_GET, [] (AsyncWebServerRequest *request){  
+    String inputMessage1;
+    inputMessage1 = request->getParam(PARAM_INPUT_1)->value();
+    String formulario =                                        //Construcción del formulario HTML de respuesta en cadena de texto
+     "<!DOCTYPE HTML>"
+      "<html>"
+      "<style>"
+          "body {"
+        "background: #0080bb;"
+        "background: linear-gradient(to right, #0080bb, #33AEFF);"
+      "}"
+      ".btn-login {"
+        "  font-size: 0.9rem;"
+        " letter-spacing: 0.05rem;"
+        " padding: 0.75rem 1rem;"
+        "}"
+        ".btn-google {"
+          "color: white !important;"
+          " background-color: #ea4335;"
+          "}"
+          ".btn-facebook {"
+            "color: white !important;"
+            "background-color: #0080bb;"
+            "}"
+            ".styleLogo{"
+              "width:25rem;"
+      "}"
+      "</style>"
+      "<head>"
+            "<link rel='stylesheet' href='style1'/>"
+            "<link rel='stylesheet' href='style2'/>"
+            "<link rel='stylesheet' href='style3'/>"
+            "<title>CONFIGURACI&Oacute;N</title>"
+          "</head>"
+      "<body>"
+        "<div class='container'>"
+          "<div class='row'>"
+            "<div class='col-sm-9 col-md-7 col-lg-5 mx-auto'>"
+              "<div class='card border-0 shadow rounded-3 my-5'>"
+                "<div class='card-body p-4 p-sm-5'>"
+                  "<h5 class='card-title text-center mb-5 fw-light fs-5'>CONFIGURACI&Oacute;N</h5>"
+                  "<form  action='/get'>"
+                    "<h6>Redes disponibles</h6>"
+                      "<ol>"
+                      "<li>";                                            //Fin del primer documento HTML
+       String formulario2 = 
+                 "</li>"                                                           
+                "</ol>" 
+                "<div class='form-floating mb-3'>"
+                "<input name='input1' type='text' class='form-control' id='floatingInput' placeholder='pepito1234' required='true'>"
+                "<label for='floatingInput'>'Escriba el n&uacute;mero de la red wifi (ejemplo: 1 o 2 o 3)'</label>"
+              "</div>"
+              "<div class='form-floating mb-3'>"
+                "<input name='input2' type='password' class='form-control' id='floatingPassword' placeholder='Password' required='true'>"
+                "<label for='floatingPassword'>Constrase&ntilde;a</label>"
+              "</div>"  
+              "<div class='d-grid'>"
+                "<button class='btn btn-primary btn-login text-uppercase fw-bold' type='submit'>Conectar</button>"
+              "</div>"
+            "</form>"
+          "</div>"
+        "</div>"
+      "</div>"
+    "</div>"
+  "</div>"
+"</body>"
+"</html>";                                               //Fin del documento HTML
+    request->send(200, "text/html", formulario+inputMessage1+formulario2);                 //Envío del formulario como respuesta al cliente 
   });
+  
   server.onNotFound(notFound);
   server.begin();
 }
