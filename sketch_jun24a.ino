@@ -5,6 +5,8 @@ EJEMPLO GET REQUEST FOR INPUT ESP32.
 #include <Arduino.h>
 #ifdef ESP32
   #include <WiFi.h>
+  #include <netinet/in.h>
+  #include <arpa/inet.h>
   #include <AsyncTCP.h>
   #include <SPIFFS.h>
   #include <FS.h>
@@ -16,6 +18,9 @@ EJEMPLO GET REQUEST FOR INPUT ESP32.
 
 
 AsyncWebServer server(80);
+//User y password wifi AP
+const char* userAdmin = "admin";
+const char* passwordAdmin = "admin";
 
 // REPLACE WITH YOUR NETWORK CREDENTIALS
 const char* ssid = "LuisManuel ";
@@ -35,11 +40,9 @@ void notFound(AsyncWebServerRequest *request) {
 void setup() {
     Serial.begin(115200);
     WiFi.mode(WIFI_STA);
-    listDir(SPIFFS, "/", 0);
     if (!SPIFFS.begin()) {
       Serial.println("SPIFFS failed to mount !\r\n");
     }
-
     String myFile = "/index.html";
 
     if(SPIFFS.exists(myFile)) {
@@ -83,15 +86,27 @@ void setup() {
   // Send a GET request to <ESP_IP>/get?input1=<inputMessage>
  server.on("/get", HTTP_GET, [] (AsyncWebServerRequest *request){  
     String inputMessage1;
+    String inputMessage2;
     inputMessage1 = request->getParam(PARAM_INPUT_1)->value();
-    
-    String formulario =                                        //Construcción del formulario HTML de respuesta en cadena de texto
+    inputMessage2 = request->getParam(PARAM_INPUT_2)->value();
+    if(inputMessage1.equals(userAdmin) && inputMessage2.equals(passwordAdmin) ){
+      String formulario =                                        //Construcción del formulario HTML de respuesta en cadena de texto
      "<!DOCTYPE HTML>"
       "<html>"
       "<style>"
           "body {"
         "background: #0080bb;"
         "background: linear-gradient(to right, #0080bb, #33AEFF);"
+      "}"
+      "@media (min-width: 1400px)"
+      ".container, .container-lg, .container-md, .container-sm, .container-xl, .container-xxl" 
+      "{"
+        "zoom: 0;"
+       "}"
+       "@media (min-width: 768px)"
+      ".container, .container-md, .container-sm" 
+      "{"
+        "zoom: 2;"
       "}"
       ".btn-login {"
         "  font-size: 0.9rem;"
@@ -119,7 +134,7 @@ void setup() {
       "<body>"
         "<div class='container'>"
           "<div class='row'>"
-            "<div class='col-sm-9 col-md-7 col-lg-5 mx-auto'>"
+            "<div class='col-sm-9 col-md-12 col-lg-5 mx-auto'>"
               "<div class='card border-0 shadow rounded-3 my-5'>"
                 "<div class='card-body p-4 p-sm-5'>"
                   "<h5 class='card-title text-center mb-5 fw-light fs-5'>CONFIGURACI&Oacute;N</h5>"
@@ -156,7 +171,12 @@ void setup() {
   "</div>"
 "</body>"
 "</html>";                                               //Fin del documento HTML
-    request->send(200, "text/html", formulario+inputMessage1+formulario2);                 //Envío del formulario como respuesta al cliente 
+    request->send(200, "text/html", formulario+inputMessage1+formulario2);  
+  }else{
+    int IPLocal = WiFi.localIP();
+    String IPRedirect = inet_ntoa(IPLocal);
+    request->send(404, "text/html", "<script>alert ('Usuario y/o Contrasenia incorrectos');window.location.href='http://"+IPRedirect+"'</script>");
+  }
   });
 
 //Tercer documento html para mostrar el mensaje de conectado exitosamente o error al conectar con la red wifi
@@ -171,6 +191,16 @@ void setup() {
           "body {"
         "background: #0080bb;"
         "background: linear-gradient(to right, #0080bb, #33AEFF);"
+      "}"
+      "@media (min-width: 1400px)"
+      ".container, .container-lg, .container-md, .container-sm, .container-xl, .container-xxl" 
+      "{"
+        "zoom: 0;"
+       "}"
+       "@media (min-width: 768px)"
+      ".container, .container-md, .container-sm" 
+      "{"
+        "zoom: 2;"
       "}"
       ".btn-login {"
         "  font-size: 0.9rem;"
@@ -198,7 +228,7 @@ void setup() {
       "<body>"
         "<div class='container'>"
           "<div class='row'>"
-            "<div class='col-sm-9 col-md-7 col-lg-5 mx-auto'>"
+            "<div class='col-sm-9 col-md-12 col-lg-5 mx-auto'>"
               "<div class='card border-0 shadow rounded-3 my-5'>"
                 "<div class='card-body p-4 p-sm-5'>"
                   "<h5 class='card-title text-center mb-5 fw-light fs-5'>CONFIGURACI&Oacute;N</h5>"
@@ -246,86 +276,3 @@ void setup() {
 }
 
 void loop() {}
-void testFileIO(fs::FS &fs, const char * path){
-   Serial.printf("Testing file I/O with %s\r\n", path);
-
-   static uint8_t buf[512];
-   size_t len = 0;
-   File file = fs.open(path, FILE_WRITE);
-   if(!file){
-      Serial.println("− failed to open file for writing");
-      return;
-   }
-
-   size_t i;
-   Serial.print("− writing" );
-   uint32_t start = millis();
-   for(i=0; i<2048; i++){
-      if ((i & 0x001F) == 0x001F){
-         Serial.print(".");
-      }
-      file.write(buf, 512);
-   }
-   Serial.println("");
-   uint32_t end = millis() - start;
-   Serial.printf(" − %u bytes written in %u ms\r\n", 2048 * 512, end);
-   file.close();
-
-   file = fs.open(path);
-   start = millis();
-   end = start;
-   i = 0;
-   if(file && !file.isDirectory()){
-      len = file.size();
-         size_t flen = len;
-         start = millis();
-         Serial.print("− reading" );
-         while(len){
-            size_t toRead = len;
-            if(toRead > 512){
-                toRead = 512;
-            }
-            file.read(buf, toRead);
-            if ((i++ & 0x001F) == 0x001F){
-              Serial.print(".");
-            }
-            len -= toRead;
-         }
-      Serial.println("");
-      end = millis() - start;
-      Serial.printf("- %u bytes read in %u ms\r\n", flen, end);
-      file.close();
-   } else {
-      Serial.println("- failed to open file for reading");
-   }
-}
-void listDir(fs::FS &fs, const char * dirname, uint8_t levels){
-   Serial.printf("Listing directory: %s\r\n", dirname);
-
-   File root = fs.open(dirname);
-   if(!root){
-      Serial.println("− failed to open directory");
-      return;
-   }
-   if(!root.isDirectory()){
-      Serial.println(" − not a directory");
-      return;
-   }
-
-   File file = root.openNextFile();
-   while(file){
-      if(file.isDirectory()){
-         Serial.print("  DIR : ");
-         Serial.println(file.name());
-         if(levels){
-            listDir(fs, file.name(), levels -1);
-         }
-      } else {
-         Serial.print("  FILE: ");
-         Serial.print(file.name());
-         Serial.print("\tSIZE: ");
-         Serial.println(file.size());
-      }
-      file = root.openNextFile();
-   }
-}
