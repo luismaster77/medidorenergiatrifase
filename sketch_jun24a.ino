@@ -23,8 +23,8 @@ const char* userAdmin = "admin";
 const char* passwordAdmin = "admin";
 
 // REPLACE WITH YOUR NETWORK CREDENTIALS
-const char* ssid = "LuisManuel ";
-const char* password = "lu13edu4rd0";
+const char* ssid = "NOMBRE_RED_WIFI";
+const char* password = "PASSWORD_RED_WIFI";
 // CREAR ACCESS POINT PARA LA CONFIGURACIÓN DE RED WIFI
 const char* ssidAP     = "ESP32-Access-Point";
 const char* passwordAP = "123456789";
@@ -77,10 +77,14 @@ void setup() {
    server.on("/style3", HTTP_GET, [](AsyncWebServerRequest *request){
     request->send(SPIFFS, "/bootstrap.bundle.min.js", "text/js");
   });
-  // Cargar estilo de login localmente
+  // Cargar logo login
    server.on("/logo", HTTP_GET, [](AsyncWebServerRequest *request){
     request->send(SPIFFS, "/logo.png", "image/png");
     });
+ // Cargar logo tablesa
+ server.on("/logo_tablesa", HTTP_GET, [](AsyncWebServerRequest *request){
+  request->send(SPIFFS, "/logo_tablesa.png", "image/png");
+  });
   
 
   // Send a GET request to <ESP_IP>/get?input1=<inputMessage>
@@ -117,13 +121,22 @@ void setup() {
           "color: white !important;"
           " background-color: #ea4335;"
           "}"
-          ".btn-facebook {"
-            "color: white !important;"
-            "background-color: #0080bb;"
-            "}"
-            ".styleLogo{"
-              "width:25rem;"
+      ".btn-facebook {"
+        "color: white !important;"
+        "background-color: #0080bb;"
+        "}"
+      ".styleLogo{"
+          "width:25rem;"
       "}"
+      ".styleLogoTablesa"
+      "{"
+          "max-width: 14%;"
+      "}"
+      ".margin-img"
+      "{"
+          "text-align: end;"
+       "}"
+      
       "</style>"
       "<head>"
             "<link rel='stylesheet' href='style1'/>"
@@ -164,6 +177,9 @@ void setup() {
                 "<button class='btn btn-primary btn-login text-uppercase fw-bold' type='submit'>Conectar</button>"
               "</div>"
             "</form>"
+            "<div class='col-md-12 mt-4 margin-img'>"
+               "<small>Powered by </small><img src='logo_tablesa' class='styleLogoTablesa'>"
+            "</div>"
           "</div>"
         "</div>"
       "</div>"
@@ -207,17 +223,25 @@ void setup() {
         " letter-spacing: 0.05rem;"
         " padding: 0.75rem 1rem;"
         "}"
-        ".btn-google {"
+      ".btn-google {"
           "color: white !important;"
           " background-color: #ea4335;"
           "}"
-          ".btn-facebook {"
-            "color: white !important;"
-            "background-color: #0080bb;"
-            "}"
-            ".styleLogo{"
-              "width:25rem;"
+      ".btn-facebook {"
+        "color: white !important;"
+        "background-color: #0080bb;"
+        "}"
+        ".styleLogo{"
+          "width:25rem;"
       "}"
+      ".styleLogoTablesa"
+      "{"
+          "max-width: 14%;"
+      "}"
+      ".margin-img"
+      "{"
+          "text-align: end;"
+       "}"
       "</style>"
       "<head>"
             "<link rel='stylesheet' href='style1'/>"
@@ -254,7 +278,7 @@ void setup() {
                 + WiFi.macAddress() + 
                 "</label>"
                 "</div>"  
-              "<div class='d-grid'>"
+              "<div class='d-grid mt-3'>"
                 "<button class='btn btn-primary btn-login text-uppercase fw-bold' type='submit'>Conectar</button>"
               "</div>"
             "</form>"
@@ -262,6 +286,9 @@ void setup() {
 
  String formulario3 =                                              //Inicio del segundo documento HTML
           "</h5>"
+           "<div class='col-md-12 mt-4 margin-img'>"
+               "<small>Powered by </small><img src='logo_tablesa' class='styleLogoTablesa'>"
+            "</div>"
           "</div>"
         "</div>"
       "</div>"
